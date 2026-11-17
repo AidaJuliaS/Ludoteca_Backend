@@ -81,6 +81,15 @@ public class LoanServiceImpl implements LoanService {
             loan = this.get(id);
         }
 
+        if (data.getGame() == null
+
+                || data.getClient() == null
+                || data.getDateStart() == null
+                || data.getDateEnd() == null) {
+
+            throw new RuntimeException("All fields are required");
+        }
+
         // Validación fecha fin < fecha inicio
         if (data.getDateEnd().isBefore(data.getDateStart())) {
             throw new RuntimeException("End date cannot be before start date");

@@ -25,4 +25,6 @@ public interface LoanRepository extends CrudRepository<Loan, Long>, JpaSpecifica
     List<Loan> findByGameId(Long gameId);
 
     List<Loan> findByClientId(Long clientId);
+
+    boolean existsByClientId(Long clientId);
 }

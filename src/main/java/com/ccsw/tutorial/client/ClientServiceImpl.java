@@ -2,9 +2,12 @@ package com.ccsw.tutorial.client;
 
 import com.ccsw.tutorial.client.model.Client;
 import com.ccsw.tutorial.client.model.ClientDto;
+import com.ccsw.tutorial.loan.LoanRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -18,6 +21,9 @@ public class ClientServiceImpl implements ClientService {
 
     @Autowired
     ClientRepository clientRepository;
+
+    @Autowired
+    private LoanRepository loanRepository;
 
     /**
      * {@inheritDoc}
@@ -71,6 +77,10 @@ public class ClientServiceImpl implements ClientService {
 
         if (this.get(id) == null) {
             throw new Exception("Not exists");
+        }
+
+        if (this.loanRepository.existsByClientId(id)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Cannot delete client with loans");
         }
 
         this.clientRepository.deleteById(id);

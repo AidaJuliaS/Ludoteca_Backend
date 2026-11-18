@@ -92,9 +92,9 @@ public class LoanServiceImpl implements LoanService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All fields are required");
         }
 
-        // Validación fecha fin < fecha inicio
-        if (data.getDateEnd().isBefore(data.getDateStart())) {
-            throw new RuntimeException("End date cannot be before start date");
+        // Validación fecha final estrictamente posterior a fecha inicial
+        if (!data.getDateEnd().isAfter(data.getDateStart())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "End date must be after start date");
         }
 
         // Validación maximo 14 dias

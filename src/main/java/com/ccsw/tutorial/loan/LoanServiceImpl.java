@@ -10,7 +10,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -87,7 +89,7 @@ public class LoanServiceImpl implements LoanService {
                 || data.getDateStart() == null
                 || data.getDateEnd() == null) {
 
-            throw new RuntimeException("All fields are required");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "All fields are required");
         }
 
         // Validación fecha fin < fecha inicio

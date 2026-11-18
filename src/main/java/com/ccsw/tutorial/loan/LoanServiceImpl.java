@@ -100,7 +100,7 @@ public class LoanServiceImpl implements LoanService {
         // Validación maximo 14 dias
         long days = ChronoUnit.DAYS.between(data.getDateStart(), data.getDateEnd());
         if (days > 14) {
-            throw new RuntimeException("Maximum loan period is 14 days");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Maximum loan period is 14 days");
         }
 
         // Validacion que no exista juego prestado simultáneamente
@@ -115,7 +115,7 @@ public class LoanServiceImpl implements LoanService {
             boolean overlap = !data.getDateEnd().isBefore(existingLoan.getDateStart()) && !data.getDateStart().isAfter(existingLoan.getDateEnd());
 
             if (overlap) {
-                throw new RuntimeException("Game already loaned");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Game already loaned");
             }
         }
 
@@ -139,7 +139,7 @@ public class LoanServiceImpl implements LoanService {
         }
 
         if (overlappingLoans >= 2) {
-            throw new RuntimeException("Client cannot have more than 2 simultaneous loans");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Client cannot have more than 2 simultaneous loans");
         }
 
         loan.setGame(this.gameRepository.findById(data.getGame().getId()).orElse(null));

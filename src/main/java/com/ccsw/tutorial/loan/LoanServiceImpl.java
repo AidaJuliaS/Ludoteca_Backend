@@ -104,39 +104,15 @@ public class LoanServiceImpl implements LoanService {
         }
 
         // Validacion que no exista juego prestado simultáneamente
-        List<Loan> loans = this.loanRepository.findByGameId(data.getGame().getId());
-        for (Loan existingLoan : loans) {
+        long overlappingGameLoans = this.loanRepository.countOverlappingLoansForGame(data.getGame().getId(), data.getDateStart(), data.getDateEnd(), id);
 
-            // si modifico el mismo prestamo lo ignora
-            if (id != null && existingLoan.getId().equals(id)) {
-                continue;
-            }
-
-            boolean overlap = !data.getDateEnd().isBefore(existingLoan.getDateStart()) && !data.getDateStart().isAfter(existingLoan.getDateEnd());
-
-            if (overlap) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Game already loaned");
-            }
+        if (overlappingGameLoans > 0) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Game already loaned");
         }
 
         // Validación de que un cliente no tenga más de 2 prestamos de manera simultanea
-        List<Loan> clientLoans = this.loanRepository.findByClientId(data.getClient().getId());
-
-        int overlappingLoans = 0;
-
-        for (Loan existingLoan : clientLoans) {
-
-            // si modifico el mismo prestamo lo ignora
-            if (id != null && existingLoan.getId().equals(id)) {
-                continue;
-            }
-
-            boolean overlap = !data.getDateEnd().isBefore(existingLoan.getDateStart()) && !data.getDateStart().isAfter(existingLoan.getDateEnd());
-
-            if (overlap) {
-                overlappingLoans++;
-            }
-        }
+        long overlappingLoans =
+                this.loanRepository.countOverlappingLoansForClient(data.getClient().getId(), data.getDateStart(), data.getDateEnd(), id);
 
         if (overlappingLoans >= 2) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Client cannot have more than 2 simultaneous loans");

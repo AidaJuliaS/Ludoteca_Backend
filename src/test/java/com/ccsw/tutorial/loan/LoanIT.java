@@ -237,7 +237,7 @@ public class LoanIT {
 
         ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -287,7 +287,7 @@ public class LoanIT {
 
         ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
@@ -308,7 +308,7 @@ public class LoanIT {
 
         ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
     }
 
     @Test
@@ -360,7 +360,66 @@ public class LoanIT {
 
         ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
 
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
     }
 
+    @Test
+    public void saveLoanWithSameStartAndEndDateShouldFail() {
+
+        GameDto game = new GameDto();
+        game.setId(1L);
+
+        ClientDto client = new ClientDto();
+        client.setId(1L);
+
+        LoanDto dto = new LoanDto();
+        dto.setGame(game);
+        dto.setClient(client);
+
+        dto.setDateStart(LocalDate.of(2027, 1, 5));
+        dto.setDateEnd(LocalDate.of(2027, 1, 5));
+
+        ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
+
+    @Test
+    public void findByGameAndClientShouldReturnFilteredLoans() {
+
+        LoanSearchDto searchDto = new LoanSearchDto();
+
+        searchDto.setGameId(1L);
+        searchDto.setClientId(1L);
+
+        searchDto.setPageable(new PageableRequest(0, PAGE_SIZE));
+
+        ResponseEntity<ResponsePage<LoanDto>> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.POST, new HttpEntity<>(searchDto), responseTypePage);
+
+        assertNotNull(response);
+        assertEquals(2, response.getBody().getTotalElements());
+    }
+
+    @Test
+    public void saveLoanWithExactly14DaysShouldBeAllowed() {
+
+        long newLoanSize = TOTAL_LOANS + 1;
+
+        GameDto game = new GameDto();
+        game.setId(2L);
+
+        ClientDto client = new ClientDto();
+        client.setId(2L);
+
+        LoanDto dto = new LoanDto();
+        dto.setGame(game);
+        dto.setClient(client);
+
+        dto.setDateStart(LocalDate.of(2027, 2, 1));
+        dto.setDateEnd(LocalDate.of(2027, 2, 15));
+
+        ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH, HttpMethod.PUT, new HttpEntity<>(dto), Void.class);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
 }

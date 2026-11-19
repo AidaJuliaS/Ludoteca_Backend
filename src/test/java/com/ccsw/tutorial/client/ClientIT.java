@@ -150,4 +150,12 @@ public class ClientIT {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
     }
+
+    @Test
+    public void deleteClientWithLoansShouldReturnConflict() {
+
+        ResponseEntity<?> response = restTemplate.exchange(LOCALHOST + port + SERVICE_PATH + "/1", HttpMethod.DELETE, null, Void.class);
+
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    }
 }
